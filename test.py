@@ -9,6 +9,7 @@ client_id = os.environ.get('LINKIFY-CLIENT-ID')
 client_secret = os.environ.get('LINKIFY-SECRET')
 redirect_uri = 'http://127.0.0.1:9090'
 
+
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id = client_id, client_secret=client_secret,redirect_uri=redirect_uri, scope = 'user-read-currently-playing user-modify-playback-state user-read-playback-state'))
 
 #spotipy does not support clearing queues. unfortunate.

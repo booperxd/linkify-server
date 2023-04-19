@@ -62,8 +62,20 @@ db.sqlite3
 db.sqlite3-journal
 
 # Flask stuff:
+venv/
+
+*.pyc
+__pycache__/
+
 instance/
-.webassets-cache
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+dist/
+build/
+*.egg-info/
 
 # Scrapy stuff:
 .scrapy
