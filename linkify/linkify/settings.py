@@ -39,8 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "linkifyapp.apps.LinkifyappConfig",
     "rest_framework.authtoken",
-    "django_filters",
-    'rest_framework',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [

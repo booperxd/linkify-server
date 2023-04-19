@@ -5,3 +5,4 @@ django-rest-framework
 jsonfield
 django-filter
 djangorestframework-filters
+drf-flex-fields

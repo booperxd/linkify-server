@@ -21,6 +21,11 @@ from linkifyapp import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.index, name = "index"),
-    path("login", views.login_test, name = "login"),
-    path("current", views.get_current_song, name = "current_song")
+    path("current", views.get_current_song, name = "current_song"),
+    path("users", views.UserView.as_view(), name = "user view"),
+    path("users/<int:pk>", views.SpecificUserView.as_view(), name = "specific user view"),
+    path("song-pairings", views.SongPairingView.as_view(), name = "song pairing view"),
+    path("song-pairings/<int:pk>", views.SpecificSongPairingView.as_view(), name = "specific song pairing view"),
+    path("song-values", views.SongValuesView.as_view(), name = "song value view"),
+    path("song-values/<int:pk>", views.SpecificSongValuesView.as_view(), name = "specific song value view"),
 ]
