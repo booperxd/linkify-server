@@ -22,6 +22,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.index, name = "index"),
     path("current", views.get_current_song, name = "current_song"),
+    path("autoqueue", views.auto_queue, name = "auto queue"),
     path("users", views.UserView.as_view(), name = "user view"),
     path("users/<str:pk>", views.SpecificUserView.as_view(), name = "specific user view"),
     path("song-pairings", views.SongPairingView.as_view(), name = "song pairing view"),

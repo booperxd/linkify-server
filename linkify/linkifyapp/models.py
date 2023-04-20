@@ -6,7 +6,7 @@ import jsonfield
 class User(models.Model):
     id = models.CharField(max_length = 50, primary_key=True)
     username = models.CharField(max_length=50)
-    song_pairings = models.ManyToManyField("SongPairing", related_name="song_pairings", blank = True)
+    song_pairings = models.ManyToManyField("SongPairing", related_name="users", blank = True)
 
     def _song_pairings(self):
         return self.song_pairings
@@ -14,7 +14,7 @@ class User(models.Model):
 class SongPairing(models.Model):
     id = models.AutoField(primary_key=True)
     song_key = models.CharField(max_length=100)
-    song_values = models.ManyToManyField("SongValues", related_name="song_values", blank = True)
+    song_values = models.ManyToManyField("SongValues", related_name="song_pairings", blank = True)
 
     def _song_values(self):
         return self.song_values

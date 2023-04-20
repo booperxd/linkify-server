@@ -18,17 +18,17 @@ redirect_uri = 'http://localhost:8888/callback'
 def index(request):
     return HttpResponse("Hi")
 
-def login_test(request):
+def login(request):
     cache_handler = spotipy.DjangoSessionCacheHandler(request)
     auth_manager = spotipy.oauth2.SpotifyOAuth(client_id = client_id, client_secret=client_secret,redirect_uri=redirect_uri, scope = 'user-read-currently-playing user-modify-playback-state user-read-playback-state', cache_handler=cache_handler)
     if auth_manager.validate_token(cache_handler.get_cached_token()):
         sp = spotipy.Spotify(cache_handler.get_cached_token()['access_token'])
         check_if_user_exists(sp)
-        return cache_handler.get_cached_token()
+        return None
     cache_handler.save_token_to_cache(auth_manager.get_access_token())
     sp = spotipy.Spotify(cache_handler.get_cached_token()['access_token'])
     check_if_user_exists(sp)
-    return cache_handler.get_cached_token()
+    return None
 
 def check_if_user_exists(sp):
     id= sp.me()['id']
@@ -38,10 +38,37 @@ def check_if_user_exists(sp):
         u.save()
 
 def get_current_song(request):
-    login_test(request)
+    login(request)
     cache_token = spotipy.DjangoSessionCacheHandler(request).get_cached_token()
-    sp = spotipy.Spotify(cache_token['access_token'])
-    return HttpResponse(sp.currently_playing()['item']['external_urls']['spotify'])
+    if (cache_token is not None):
+        sp = spotipy.Spotify(cache_token['access_token'])
+        if (sp.currently_playing() is not None):
+            cur_song = sp.currently_playing()['item']['external_urls']['spotify']
+            if cur_song is not None:
+                return HttpResponse(cur_song)
+        return HttpResponse("No song playing")
+                
+    else:
+        return HttpResponse(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
+
+def auto_queue(request):
+    login(request)
+    cache_token = spotipy.DjangoSessionCacheHandler(request).get_cached_token()
+    if cache_token is not None:
+        sp = spotipy.Spotify(cache_token['access_token'])
+        id = sp.me()['id']
+        cur_user = User.objects.get(id = id)
+        cur_song = sp.currently_playing()['item']['external_urls']['spotify']
+        try:
+            songs = cur_user.song_pairings.get(song_key=cur_song).song_values.all()
+            for song in songs:
+                sp.add_to_queue(song.song_uri)
+        except:
+            return HttpResponse("h")
+
+
+    return HttpResponse("h")
+        
 
 
 class UserView(generics.ListCreateAPIView):
@@ -81,6 +108,7 @@ class SongPairingView(generics.ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+    
 
 class SpecificSongPairingView(generics.RetrieveUpdateDestroyAPIView):
     queryset = SongPairing.objects.all()
@@ -92,6 +120,9 @@ class SpecificSongPairingView(generics.RetrieveUpdateDestroyAPIView):
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
     
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
 class SongValuesView(generics.ListCreateAPIView):
     model = SongValues
     queryset = SongValues.objects.all()
