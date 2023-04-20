@@ -22,11 +22,12 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.index, name = "index"),
     path("current", views.get_current_song, name = "current_song"),
-    path("autoqueue", views.auto_queue, name = "auto queue"),
+    path("check-songs", views.compare_songs, name = "check client song"),
     path("users", views.UserView.as_view(), name = "user view"),
     path("users/<str:pk>", views.SpecificUserView.as_view(), name = "specific user view"),
     path("song-pairings", views.SongPairingView.as_view(), name = "song pairing view"),
     path("song-pairings/<int:pk>", views.SpecificSongPairingView.as_view(), name = "specific song pairing view"),
     path("song-values", views.SongValuesView.as_view(), name = "song value view"),
     path("song-values/<int:pk>", views.SpecificSongValuesView.as_view(), name = "specific song value view"),
+    
 ]

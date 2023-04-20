@@ -1,41 +1,23 @@
 from django.shortcuts import redirect, render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework import status, generics, filters
+from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 
 from .models import User, SongPairing, SongValues
 
+import json
 import os
 import spotipy
 
 from . import serializers
-
-client_id = os.environ.get('LINKIFY_CLIENT_ID')
-client_secret = os.environ.get('LINKIFY_SECRET')
-redirect_uri = 'http://localhost:8888/callback'
+from .login import login
+from .auto_queue import auto_queue
 
 def index(request):
     return HttpResponse("Hi")
-
-def login(request):
-    cache_handler = spotipy.DjangoSessionCacheHandler(request)
-    auth_manager = spotipy.oauth2.SpotifyOAuth(client_id = client_id, client_secret=client_secret,redirect_uri=redirect_uri, scope = 'user-read-currently-playing user-modify-playback-state user-read-playback-state', cache_handler=cache_handler)
-    if auth_manager.validate_token(cache_handler.get_cached_token()):
-        sp = spotipy.Spotify(cache_handler.get_cached_token()['access_token'])
-        check_if_user_exists(sp)
-        return None
-    cache_handler.save_token_to_cache(auth_manager.get_access_token())
-    sp = spotipy.Spotify(cache_handler.get_cached_token()['access_token'])
-    check_if_user_exists(sp)
-    return None
-
-def check_if_user_exists(sp):
-    id= sp.me()['id']
-    name = sp.me()['display_name']
-    if not User.objects.filter(id=id,username=name).exists():
-        u = User(id=id,username=name)
-        u.save()
 
 def get_current_song(request):
     login(request)
@@ -49,27 +31,24 @@ def get_current_song(request):
         return HttpResponse("No song playing")
                 
     else:
-        return HttpResponse(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
+        return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
-def auto_queue(request):
+@api_view(("POST",))
+def compare_songs(request):
     login(request)
     cache_token = spotipy.DjangoSessionCacheHandler(request).get_cached_token()
     if cache_token is not None:
-        sp = spotipy.Spotify(cache_token['access_token'])
-        id = sp.me()['id']
-        cur_user = User.objects.get(id = id)
-        cur_song = sp.currently_playing()['item']['external_urls']['spotify']
         try:
-            songs = cur_user.song_pairings.get(song_key=cur_song).song_values.all()
-            for song in songs:
-                sp.add_to_queue(song.song_uri)
+            client_song = json.loads(request.body)['current']
+            sp = spotipy.Spotify(cache_token['access_token'])
+            cur_song = sp.currently_playing()['item']['external_urls']['spotify']
+            if client_song != cur_song:
+                auto_queue(request)
         except:
-            return HttpResponse("h")
-
-
-    return HttpResponse("h")
-        
-
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({'new_song' : cur_song})
+    else:
+        return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
 class UserView(generics.ListCreateAPIView):
     model = User
