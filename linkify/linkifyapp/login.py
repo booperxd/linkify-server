@@ -24,3 +24,7 @@ def check_if_user_exists(sp):
     if not User.objects.filter(id=id,username=name).exists():
         u = User(id=id,username=name)
         u.save()
+
+def check_current_user_match(sp, id):
+    session_id = sp.me()['id']
+    return session_id == id

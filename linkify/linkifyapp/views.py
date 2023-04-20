@@ -13,7 +13,7 @@ import os
 import spotipy
 
 from . import serializers
-from .login import login
+from .login import login, check_current_user_match
 from .auto_queue import auto_queue
 
 def index(request):
@@ -68,14 +68,30 @@ class SpecificUserView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+    def put(self, request, pk, *args, **kwargs):
+        login(request)
+        cache_token = spotipy.DjangoSessionCacheHandler(request).get_cached_token()
+        if check_current_user_match(spotipy.Spotify(cache_token['access_token']), pk):
+            return self.update(request, *args, **kwargs)
+        else:
+            return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def get(self, request, pk, *args, **kwargs):
+        login(request)
+        cache_token = spotipy.DjangoSessionCacheHandler(request).get_cached_token()
+        if check_current_user_match(spotipy.Spotify(cache_token['access_token']), pk):
+            return self.retrieve(request, *args, **kwargs)
+        else:
+            return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
     
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def delete(self, request, pk, *args, **kwargs):
+        login(request)
+        cache_token = spotipy.DjangoSessionCacheHandler(request).get_cached_token()
+        if check_current_user_match(spotipy.Spotify(cache_token['access_token']), pk):
+            return self.destroy(request, *args, **kwargs)
+        else:
+            return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
+        
 class SongPairingView(generics.ListCreateAPIView):
     model = SongPairing
     queryset = SongPairing.objects.all()
