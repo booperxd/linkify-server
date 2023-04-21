@@ -46,7 +46,7 @@ def compare_songs(request):
                 auto_queue(request)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        return JsonResponse({'new_song' : cur_song})
+        return JsonResponse({'current' : cur_song})
     else:
         return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
