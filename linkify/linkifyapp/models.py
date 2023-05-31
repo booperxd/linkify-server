@@ -10,6 +10,7 @@ class User(models.Model):
     id = models.CharField(max_length = 50, primary_key=True)
     username = models.CharField(max_length=50)
     song_pairings = models.ManyToManyField("SongPairing", related_name="users", blank = True)
+    token = models.CharField(max_length=250, blank=True)
 
     def _song_pairings(self):
         return self.song_pairings

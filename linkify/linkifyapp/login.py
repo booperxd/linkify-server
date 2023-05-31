@@ -7,16 +7,14 @@ client_secret = os.environ.get('LINKIFY_SECRET')
 redirect_uri = 'http://localhost:8888/callback'
 
 def login(request):
-    cache_handler = spotipy.DjangoSessionCacheHandler(request)
-    auth_manager = spotipy.oauth2.SpotifyOAuth(client_id = client_id, client_secret=client_secret,redirect_uri=redirect_uri, scope = 'user-read-currently-playing user-modify-playback-state user-read-playback-state', cache_handler=cache_handler)
-    if auth_manager.validate_token(cache_handler.get_cached_token()):
-        sp = spotipy.Spotify(cache_handler.get_cached_token()['access_token'])
-        check_if_user_exists(sp)
-        return None
-    cache_handler.save_token_to_cache(auth_manager.get_access_token())
-    sp = spotipy.Spotify(cache_handler.get_cached_token()['access_token'])
+    auth_manager = spotipy.oauth2.SpotifyOAuth(client_id = client_id, client_secret=client_secret,redirect_uri=redirect_uri, scope = 'user-read-currently-playing user-modify-playback-state user-read-playback-state')
+    token = auth_manager.get_access_token()['access_token']
+    sp = spotipy.Spotify(auth_manager=auth_manager)
     check_if_user_exists(sp)
-    return None
+    cur_user = User.objects.get(id = sp.me()['id'])
+    cur_user.token = token
+    cur_user.save()
+    request.user = cur_user
 
 def check_if_user_exists(sp):
     id= sp.me()['id']
@@ -25,6 +23,17 @@ def check_if_user_exists(sp):
         u = User(id=id,username=name)
         u.save()
 
-def check_current_user_match(sp, id):
-    session_id = sp.me()['id']
-    return session_id == id
+def check_authenticated(request):
+    try:
+        token = request.user.token
+    except:
+        token = None
+    if token is not None or (spotipy.Spotify(token) == True):
+        return True
+    else:
+        login(request)
+        if request.user.token is None:
+            return False
+        else:
+            return True
+    
