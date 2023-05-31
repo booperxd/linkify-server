@@ -24,12 +24,10 @@ def check_if_user_exists(sp):
         u.save()
 
 def check_authenticated(request):
-    print('???')
     try:
         token = request.user.token
     except:
         token = None
-    print(token)
     if token is not None or (spotipy.Spotify(token) == True):
         return True
     else:

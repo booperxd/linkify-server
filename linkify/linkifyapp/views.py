@@ -26,8 +26,8 @@ def get_current_song(request):
         if (sp.currently_playing() is not None):
             cur_song = sp.currently_playing()['item']['external_urls']['spotify']
             if cur_song is not None:
-                return HttpResponse(cur_song)
-        return HttpResponse("No song playing")        
+                return JsonResponse({'current' : cur_song})
+        return JsonResponse({'current' : ""})       
     else:
         return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
