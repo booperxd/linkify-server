@@ -2,12 +2,10 @@ import spotipy
 from .login import login
 from .views import User
 
-def auto_queue(request):
-    login(request)
-    cache_token = spotipy.DjangoSessionCacheHandler(request).get_cached_token()
-    if cache_token is not None:
+def auto_queue(request, token):
+    if token is not None:
         try:
-            sp = spotipy.Spotify(cache_token['access_token'])
+            sp = spotipy.Spotify(token)
             id = sp.me()['id']
             cur_user = User.objects.get(id = id)
             cur_song = sp.currently_playing()['item']['external_urls']['spotify']

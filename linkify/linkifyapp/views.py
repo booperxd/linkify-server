@@ -40,7 +40,7 @@ def compare_songs(request):
             sp = spotipy.Spotify(token)
             cur_song = sp.currently_playing()['item']['external_urls']['spotify']
             if client_song != cur_song:
-                auto_queue(request)
+                auto_queue(request, token)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({'current' : cur_song})
