@@ -4,12 +4,14 @@ import os
 
 client_id = os.environ.get('LINKIFY_CLIENT_ID')
 client_secret = os.environ.get('LINKIFY_SECRET')
-redirect_uri = 'http://localhost:8888/callback'
+redirect_uri = 'http://localhost:8888/callback/'
 
 def login(request):
-    auth_manager = spotipy.oauth2.SpotifyOAuth(client_id = client_id, client_secret=client_secret,redirect_uri=redirect_uri, scope = 'user-read-currently-playing user-modify-playback-state user-read-playback-state')
+    #cred_manager = spotipy.SpotifyClientCredentials(client_id = client_id, client_secret=client_secret)
+    auth_manager = spotipy.oauth2.SpotifyOAuth(client_id = client_id, client_secret=client_secret,redirect_uri=redirect_uri, open_browser=False, cache_path='./tokens.txt', scope = 'user-read-currently-playing user-modify-playback-state user-read-playback-state')    
     token = auth_manager.get_access_token()['access_token']
     sp = spotipy.Spotify(auth_manager=auth_manager)
+   # print(sp.me()['id'])
     check_if_user_exists(sp)
     cur_user = User.objects.get(id = sp.me()['id'])
     cur_user.token = token
