@@ -21,13 +21,13 @@ class User(models.Model):
 class SongPairing(models.Model):
     id = models.AutoField(primary_key=True)
     song_key = models.CharField(max_length=100)
-    song_values = models.ManyToManyField("SongValues", related_name="song_pairings", blank = True)
+    song_value = models.CharField(max_length=100)
 
     def _song_values(self):
-        return self.song_values
+        return self.song_value
     
 #id = auto gen number
 #song_uri = https://open.spotify.com/track/1BcuFfskHNf1WvqpyCs4wT
-class SongValues(models.Model):
-    id = models.AutoField(primary_key=True)
-    song_uri = models.CharField(max_length=100)
+#class SongValues(models.Model):
+#    id = models.AutoField(primary_key=True)
+#    song_uri = models.CharField(max_length=100)

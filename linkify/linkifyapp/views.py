@@ -5,8 +5,10 @@ from rest_framework.decorators import api_view, renderer_classes
 from rest_framework import status, generics, filters
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
+from django_filters.rest_framework import DjangoFilterBackend
+import rest_flex_fields.filter_backends as flex_filters
 
-from .models import User, SongPairing, SongValues
+from .models import User, SongPairing
 
 import json
 import os
@@ -51,7 +53,8 @@ class UserView(generics.ListCreateAPIView):
     model = User
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
-    search_fields = ['id', 'username']
+    filter_backends = [DjangoFilterBackend, flex_filters.FlexFieldsFilterBackend]
+    filterset_fields = ['id', 'username']
 
     def post(self, request, *args, **kwargs):
         if check_authenticated(request):
@@ -93,7 +96,8 @@ class SongPairingView(generics.ListCreateAPIView):
     model = SongPairing
     queryset = SongPairing.objects.all()
     serializer_class = serializers.SongPairingSerializer
-    search_fields = ['id', 'song_key']
+    filter_backends = [DjangoFilterBackend, flex_filters.FlexFieldsFilterBackend]
+    filterset_fields = ['id', 'song_key', 'song_value']
 
     def post(self, request, *args, **kwargs):
         if check_authenticated(request):
@@ -130,42 +134,43 @@ class SpecificSongPairingView(generics.RetrieveUpdateDestroyAPIView):
         else:
             return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
-class SongValuesView(generics.ListCreateAPIView):
-    model = SongValues
-    queryset = SongValues.objects.all()
-    serializer_class = serializers.SongValuesSerializer
-    search_fields = ['id', 'song_uri']
+#class SongValuesView(generics.ListCreateAPIView):
+#    model = SongValues
+#    queryset = SongValues.objects.all()
+#    serializer_class = serializers.SongValuesSerializer
+#     filter_backends = [DjangoFilterBackend, flex_filters.FlexFieldsFilterBackend]
+#     filterset_fields = ['id', 'song_uri']
 
-    def post(self, request, *args, **kwargs):
-        if check_authenticated(request):
-            return self.create(request, *args, **kwargs)
-        else:
-            return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
+#     def post(self, request, *args, **kwargs):
+#         if check_authenticated(request):
+#             return self.create(request, *args, **kwargs)
+#         else:
+#             return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
-    def get(self, request, *args, **kwargs):
-        if check_authenticated(request):
-            return self.list(request, *args, **kwargs)
-        else:
-            return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
+#     def get(self, request, *args, **kwargs):
+#         if check_authenticated(request):
+#             return self.list(request, *args, **kwargs)
+#         else:
+#             return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
-class SpecificSongValuesView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = SongValues.objects.all()
-    serializer_class = serializers.SongValuesSerializer
+# class SpecificSongValuesView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = SongValues.objects.all()
+#     serializer_class = serializers.SongValuesSerializer
 
-    def put(self, request, pk, *args, **kwargs):
-        if check_authenticated(request):
-            return self.update(request, *args, **kwargs)
-        else:
-            return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
+#     def put(self, request, pk, *args, **kwargs):
+#         if check_authenticated(request):
+#             return self.update(request, *args, **kwargs)
+#         else:
+#             return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
 
-    def get(self, request, pk, *args, **kwargs):
-        if check_authenticated(request):
-            return self.retrieve(request, *args, **kwargs)
-        else:
-            return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
+#     def get(self, request, pk, *args, **kwargs):
+#         if check_authenticated(request):
+#             return self.retrieve(request, *args, **kwargs)
+#         else:
+#             return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
     
-    def delete(self, request, pk, *args, **kwargs):
-        if check_authenticated(request):
-            return self.destroy(request, *args, **kwargs)
-        else:
-            return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)
+#     def delete(self, request, pk, *args, **kwargs):
+#         if check_authenticated(request):
+#             return self.destroy(request, *args, **kwargs)
+#         else:
+#             return Response(status=status.HTTP_511_NETWORK_AUTHENTICATION_REQUIRED)

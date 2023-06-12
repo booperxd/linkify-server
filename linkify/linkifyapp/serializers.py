@@ -14,7 +14,7 @@ class SongPairingSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = models.SongPairing
         fields = '__all__'
-class SongValuesSerializer(FlexFieldsModelSerializer):
-    class Meta:
-        model = models.SongValues
-        fields = '__all__'
+#class SongValuesSerializer(FlexFieldsModelSerializer):
+#    class Meta:
+#        model = models.SongValues
+#        fields = '__all__'
